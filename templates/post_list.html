@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid col-sm-7">
+    <div class="row">
+        <div class="col-sm-12">
+            <form method="GET">
+                <div class="row">
+                <div class="col-xs-12">
+                    <div class="input-group search-bar">
+                        <input class="form-control" type="text" placeholder="Search posts" name="{{ post_search_var }}" value="{{ search }}"/>
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="submit">
+                                <span class="glyphicon glyphicon-search"></span>&nbsp;
+                            </button>
+                        </span>
+                    </div>
+                </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for post in posts %}
+        <div class="col-sm-12">
+            <div class="thumbnail">
+                {% if post.image %}
+                <img class ="img-responsive" src="{{ post.image.url }}" alt="{{ post.title }}"/>
+                {% endif %}
+                <div class="caption">
+
+                    {% if request.user.is_staff or request.user.is_superuser %}
+                    <a class="btn btn-sm btn-warning pull-right" href="{{ post.get_absolute_url }}edit">
+                        <span class="glyphicon glyphicon-pencil "></span>
+                        edit
+                    </a>
+                    <a class="btn btn-sm btn-danger pull-right" href="{{ post.get_absolute_url }}delete">
+                        <span class="glyphicon glyphicon-trash"></span> delete
+                    </a>
+                    {% endif %}
+
+                    <h1>{{ post.title }}</h1>
+                    <h5>
+                        by {{ post.user }} |
+                        <small>read time : {{ post.read_time }} minute{% if post.read_time > 1 %}s{% endif %}</small>
+                    </h5>
+
+                    {% if post.draft %}
+                    <h5 class="label label-danger">Draft</h5>
+                    {% endif %}
+                    {% if post.publish > today %}
+                    <h5 class="label label-info">Future Post</h5>
+                    {% endif %}<hr/>
+                    <p>{{ post.get_markdown|truncatechars_html:256 }}</p>
+                    <p><a href="{{ post.get_absolute_url }}" class="btn btn-primary" role="button">Read More</a></p>
+                </div>
+            </div>
+        </div>
+        {# cycle '</div><hr/><div class="row">'#}
+        {% endfor %}
+    </div>
+    <div class="row pagination-holder">
+        {% include 'paginator.html' %}
+    </div>
+</div>
+{% endblock content %}

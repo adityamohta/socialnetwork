@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+{% block head_title %}Create Post | {{ block.super }}{% endblock head_title %}
+
+{% block head_extra %}
+{{form.media}}
+{% endblock head_extra %}
+
+{% block profile %}{% endblock profile %}
+
+{% block content %}
+
+<div class="col-sm-12">
+    <div class="row">
+        <div class="col-sm-6 col-sm-offset-3">
+            <div class="well">
+                <!--to pass any media through form use following.-->
+                <!--enctype="multipart/form-data"-->
+                <form method="POST" action="">    {% csrf_token %}
+                    <h2>{{ title }}</h2>
+                    {{ form|crispy }}
+                    <input type="submit" class="btn btn-primary" value="{{ title }}" />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block messages %}{% endblock messages %}

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+{% block head_title %}Create Post | {{ block.super }}{% endblock head_title %}
+
+{% block head_extra %}
+    {{form.media}}
+{% endblock head_extra %}
+
+{% block profile %}{% endblock profile %}
+
+{% block content %}
+
+<div class="col-sm-12">
+    <div class="row">
+        <div class="col-md-6 col-sm-5">
+            <h1>Preview</h1>
+            <div class="custom-well content-preview">
+                <div class="caption">
+                    <h3 id="preview-title"></h3><hr/>
+                    <p id="preview-content"></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-sm-7">
+            <h1>Create Post</h1>
+            <div class="custom-well">
+                <form method="POST" action="" enctype="multipart/form-data">    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block messages %}{% endblock messages %}

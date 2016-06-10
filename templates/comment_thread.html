@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+{% block head_title %}{{ post.title }} | {{ block.super }}{% endblock head_title %}
+
+{% block post_detail_link %}
+<li><a class="btn btn-primary" href="{{ comment.content_object.get_absolute_url }}">{{ comment.content_object.title }}</a></li>
+<li>{{ comment.user }}</li>
+{% endblock post_detail_link %}
+
+{% block content %}
+<div class="container-fluid col-sm-9">
+    <div class="row">
+        <div class="col-sm-12">
+            {# comment.content_object #}<!--to get post object through comment obj-->
+            <blockquote>
+                <div class="comment-main custom-well">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            {%  if comment.user.profile.profile_picture %}
+                            <img class="img-responsive " src="{{ comment.user.profile.profile_picture.url }}" />
+                            {% else %}
+                            <img class="img-responsive" src="{% static 'default/profile.png' %}" />
+                            {% endif %}
+                        </div>
+                        <div class="col-sm-10">
+                            <p>{{ comment.content|linebreaks }}</p>
+                        </div>
+                    </div>
+                    <footer>via {{ comment.user.username }} |
+                        {{ comment.timestamp|timesince }} ago |
+
+                        {% if comment.children.count > 0 %}
+                        {{ comment.children.count }} comment{% if comment.children.count > 1 %}s{% endif %} |
+                        {% endif %}
+
+                        {% if request.user == comment.user %}
+                        <a href="{{ comment.get_delete_url }}">Delete</a>
+                        {% endif %}
+
+                    </footer>
+                </div>
+
+                <div class="custom-well">
+                    {% for child_comment in comment.children %}
+                        <div class="row">
+                            <div class="col-sm-2">
+                                {%  if child_comment.user.profile.profile_picture %}
+                                <img class="img-responsive " src="{{ child_comment.user.profile.profile_picture.url }}" />
+                                {% else %}
+                                <img class="img-responsive" src="{% static 'default/profile.png' %}" />
+                                {% endif %}
+                            </div>
+                            <div class="col-sm-10">
+                                <p>{{ child_comment.content|linebreaks }}</p>
+                            </div>
+                        </div>
+                        <footer>
+                            via {{ child_comment.user.username }} |
+                            {{ child_comment.timestamp|timesince }} ago |
+                            {% if request.user == child_comment.user %}
+                            <a href="{{ child_comment.get_delete_url }}">Delete</a>
+                            {% endif %}
+                        </footer>
+                    <hr/>
+                    {% endfor %}
+                    {% if request.user.is_authenticated %}
+                    <form method="POST" action="."> {% csrf_token %}
+                        {{ comment_form|crispy }}
+                        <input type="hidden" name='parent_id' value="{{ comment.id }}" />
+                        <input type="submit" class="btn btn-primary btn-sm" value="Reply" />
+                    </form>
+                    {% else %}
+                    <p>You must login to comment.</p>
+                    {% endif %}
+                </div>
+
+            </blockquote>
+            <hr/>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+{% block profile %}{% endblock profile %}

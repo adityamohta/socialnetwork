@@ -1,0 +1,70 @@
+<ul class="col-md-12 pagination pagination-md" id="pagination">
+    <!-- First Page Link condition -->
+    {% if posts.number > 1 %}
+    <li class="">
+        <a class="" href="?{{ page_request_var }}={{1}}{% if search %}&q={{ search }}{% endif %}" >
+            <strong>First</strong>
+        </a>
+    </li>
+    {% else %}
+    <li class="page-num disabled">
+        <a><strong>First</strong></a>
+    </li>
+    {% endif %}
+
+    <!-- Previous Page Link condition -->
+    {% if posts.has_previous %}
+    <li class="">
+        <a class="" href="?{{ page_request_var }}={{ posts.previous_page_number }}{% if search %}&q={{ search }}{% endif %}">
+            <strong>Previous</strong>
+        </a>
+    </li>
+    {% else %}
+    <li class="page-num disabled">
+        <a><strong>Previous</strong></a>
+    </li>
+    {% endif %}
+
+    <!-- List of all pages and active link should be highlighted condition. -->
+    {% if posts.paginator.num_pages != 1 %}
+    {% for num in page_num_list %}
+    <li class="{% if num == posts.number %}active{% endif %}">
+        <a class="" href="?{{ page_request_var }}={{num}}{% if search %}&q={{ search }}{% endif %}">
+            <strong>{{num}}</strong>
+        </a>
+    </li>
+    {% endfor %}
+    {% else %}
+    <li class="active">
+        <a class="" href="?{{ page_request_var }}={{num}}{% if search %}&q={{ search }}{% endif %}">
+            <strong>1</strong>
+        </a>
+    </li>
+    {% endif %}
+
+    <!-- Next Page Link Codition -->
+    {% if posts.has_next %}
+    <li class="">
+        <a class="" href="?{{ page_request_var }}={{ posts.next_page_number }}{% if search %}&q={{ search }}{% endif %}">
+            <strong>Next</strong>
+        </a>
+    </li>
+    {% else %}
+    <li class="page-num disabled">
+        <a><strong>Next</strong></a>
+    </li>
+    {% endif %}
+
+    <!-- Last Page Link Condition -->
+    {% if posts.number != posts.paginator.num_pages %}
+    <li class="page-num">
+        <a class="" href="?{{ page_request_var }}={{ posts.paginator.num_pages }}{% if search %}&q={{ search }}{% endif %}">
+            <strong>Last</strong>
+        </a>
+    </li>
+    {% else %}
+    <li class="page-num disabled">
+        <a><strong>Last</strong></a>
+    </li>
+    {% endif %}
+ </ul>

@@ -1,0 +1,173 @@
+{% load staticfiles %}
+<!--DOCTYPE html-->
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>{% block head_title %}Post List{% endblock %}</title>
+
+        <style> {% block head_style %}{% endblock head_style%} </style>
+
+        <link rel="stylesheet" href="{% static 'css/base.css' %}"/>
+
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+        <!--<link rel="stylesheet" href="{% static 'css/bootstrap-material-design.min.css' %}"/>-->
+        <!--<link rel="stylesheet" href="{% static 'css/ripples.min.css' %}"/>-->
+        {% block head_extra %}{% endblock head_extra %}
+    </head>
+    <body>
+        <div id="fb-root"></div>
+        <script>
+            (function(d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0];
+                if (d.getElementById(id)) return;
+                js = d.createElement(s); js.id = id;
+                js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.6&appId=556334674571369";
+                fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));
+        </script>
+        <div class="header">
+            <div class="row">
+                <h1 class="text-center">BLOG</h1>
+            </div>
+        </div>
+        <div class="container">
+            <ol class="breadcrumb">
+                <li><a class="btn btn-primary" href="{% url 'posts:list' %}">Home</a></li>
+
+                {% block post_detail_link %}
+                {% endblock post_detail_link %}
+
+                {% if not request.user.is_authenticated %}
+                <li class="pull-right"><a class="btn btn-primary" href="{% url 'accounts:register' %}">Register</a></li>
+                <li class="pull-right"><a class="btn btn-primary" href="{% url 'accounts:login' %}">Login</a></li>
+                {% else %}
+                <li class="pull-right "><a class="btn btn-primary" href="{% url 'accounts:logout' %}">Logout</a></li>
+                {% endif %}
+            </ol>
+
+            <div class="row">
+                {% block profile %}
+                <div class="col-sm-3">
+                    {% if request.user.is_authenticated %}
+                    <div class="thumbnail col-xs-12">
+                        <a class="btn btn-sm btn-danger pull-right edit-btn" href="{% url 'accounts:profile' %}">
+                            View
+                        </a>
+                        {% if request.user.profile.profile_picture %}
+                        <img class="img-responsive profile-pic" src="{{ request.user.profile.profile_picture.url }}"/>
+                        {% else %}
+                        <img class="img-responsive profile-pic" src="{% static 'default/profile.png' %}"/>
+                        {% endif %}
+                        <div class="caption">
+                            <p>
+                                <a href="{% url 'accounts:profile' %}"><h3>{{ request.user.first_name }} {{ request.user.last_name }}</h3></a><hr>
+                                <h4>{{ request.user }}</h4>
+                                <small>( <a href="{% url 'accounts:logout' %}">LogOut</a> )</small>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="custom-well col-xs-12">
+                        <p><strong>About</strong></p>
+                    </div>
+
+                    <div class="custom-well col-xs-12">
+                        <p><strong>Photos</strong></p>
+                    </div>
+                    {% else %}
+                    <div class="thumbnail col-xs-12">
+                        <div class="caption">
+                            <h3>Anonymous User</h3>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endblock profile %}
+
+                {% block content %}
+                {% endblock content %}
+
+                {% block messages %}
+                <div class="col-sm-2">
+                    {% include 'messages.html' %}
+                </div>
+                {% endblock messages %}
+
+            </div>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" ></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.5/marked.min.js"></script>
+        <!--<script src="{% static 'js/material.min.js' %}"></script>-->
+        <!--<script src="{% static 'js/ripples.min.js' %}"></script>-->
+
+        <script type="text/javascript">
+            $(document).ready(function() {
+                //console.log("hey baby");
+                $(".alert").slideDown("fast");
+
+                $(".comment-reply-btn").click(function(event){
+                    event.preventDefault();
+                    $(this).parent().parent().next(".comment-reply").slideToggle();
+                    //$(".comment-reply").fadeToggle(); this will toggle all the comment-reply button. we dont want that.
+                });
+
+                $(".profile-edit-button").click(function(event){
+                    event.preventDefault();
+                    $(".custom-caption").slideToggle();
+                });
+            });
+            $(document).ready(function(){
+                $(".content-markdown").each(function(){
+                    var content = $(this).text();
+                    //console.log(content);
+                    var markedContent = marked(content);
+                    //console.log(markedContent);
+                    $(this).html(markedContent);
+                });
+                $(".content-markdown img").each(function(){
+                    $(this).addClass("responsive-img");
+                });
+                $(".messages .html_safe div").each(function(){
+                    $(this).addClass("card-panel teal");
+                });
+                $(".caption p img").each(function(){
+                    $(this).addClass("img-responsive")
+                });
+
+                var contentInput = $("#id_content");
+
+                function setContent(value){
+                     var markedContent = marked(value);
+                    $("#preview-content").html(markedContent);
+                    $("#preview-content img").each(function(){
+                        $(this).addClass("img-responsive");
+                    });
+                }
+                setContent(contentInput.val());
+                contentInput.keyup(function(){
+                    var newContent = $(this).val();
+                    setContent(newContent);
+                    //console.log(newContent);
+                });
+
+                var titleInput = $("#id_title");
+                function setTitle(value){
+                    $("#preview-title").html(value);
+                }
+                setTitle(titleInput.val());
+                titleInput.keyup(function(){
+                    var newContent = $(this).val();
+                    setTitle(newContent);
+                    //console.log(newContent);
+                });
+
+            })
+        </script>
+
+
+    </body>
+</html>

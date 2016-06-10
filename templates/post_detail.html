@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load urlify %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+{% block head_title %}{{ post.title }} | {{ block.super }}{% endblock head_title %}
+
+{% block post_detail_link %}
+<li><a class="btn btn-primary" href="{{ instance.get_absolute_url }}">{{ post.title }}</a></li>
+{% endblock post_detail_link %}
+
+{% block content %}
+<div class="container-fluid col-sm-7">
+    <div class="row">
+        <div class="col-sm-12">
+
+            <div class="thumbnail">
+                {% if post.image %}
+                <img src="{{ post.image.url }}" class="img-responsive" alt="...">
+                {% endif %}
+                <div class="caption">
+
+                    {% if request.user.is_staff or request.user.is_superuser %}
+                    <a href="{{ post.get_absolute_url }}edit">
+                        <span class="glyphicon glyphicon-pencil pull-right edit-icon"></span>
+                    </a>
+                    {% endif %}
+                    {% if request.user.is_staff or request.user.is_superuser %}
+                    <a href="{{ post.get_absolute_url }}delete">
+                        <span class="glyphicon glyphicon-trash pull-right edit-icon"></span>
+                    </a>
+                    {% endif %}
+
+                    <h3>{{ post.title }}</h3>
+                    {% if post.draft %}
+                        <h5 class="label label-danger">Draft</h5>
+                    {% endif %}
+                    {% if post.publish > today %}
+                        <h5 class="label label-info">Future Post</h5>
+                    {% endif %}
+                    {% if post.user.get_full_name %}
+                        <h5> by {{ post.user.get_full_name }} </h5>
+                    {% endif %}
+                    <p>
+                        on {{ post.publish }} |
+                        <small>read time : {{ post.read_time }} minute{% if post.read_time > 1 %}s{% endif %}</small>
+                    </p>
+                    <hr/>
+                    {# post.content|urlify #}
+                    {# share_string #}
+                    <p><div class="fb-like" data-href="{{ request.build_absolute_uri }}" data-layout="button_count" data-action="like" data-show-faces="true" data-share="true"></div></p>
+                    <hr/>
+                    <p class="content-markdown">{{ post.content }}</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <hr/>
+                    <p class="lead">Comments</p>
+                    {% if request.user.is_authenticated %}
+                    <form method="POST" action="."> {% csrf_token %}
+                        {{ comment_form|crispy }}
+                        <input type="submit" class="btn btn-primary" value="Comment" />
+                    </form>
+                    {% else %}
+                    <p>You must login to comment.</p>
+                    {% endif %}
+                    <hr/>
+
+                    {% for comment in comments %}
+                    {# comment.content_object #}<!--to get post object through comment obj-->
+                    <div class="comment-main custom-well">
+                        <div class="row">
+                            <div class="col-sm-2">
+                                {%  if comment.user.profile.profile_picture %}
+                                <img class="img-responsive " src="{{ comment.user.profile.profile_picture.url }}" />
+                                {% else %}
+                                <img class="img-responsive" src="{% static 'default/profile.png' %}" />
+                                {% endif %}
+                            </div>
+                            <div class="col-sm-10">
+                                <p>{{ comment.content|linebreaks }}</p>
+                            </div>
+                        </div>
+                        <footer>
+                            via {{ comment.user.username }} |
+                            {{ comment.timestamp|timesince }} ago |
+                            {% if comment.children.count > 0 %}
+                                {{ comment.children.count }} comment{% if comment.children.count > 1 %}s{% endif %} |
+                            {% endif %}
+                            <a href="#" class="comment-reply-btn">reply</a> |
+                            <a href="{{ comment.get_absolute_url }}">Thread</a> |
+                            {% if request.user == comment.user %}
+                            <a href="{{ comment.get_delete_url }}">Delete</a>
+                            {% endif %}
+                        </footer>
+                    </div>
+                    <div class="comment-reply custom-well comment-main">
+                        {% for child_comment in comment.children %}
+                        <div class="row">
+                            <div class="col-sm-2">
+                                {%  if child_comment.user.profile.profile_picture %}
+                                <img class="img-responsive " src="{{ child_comment.user.profile.profile_picture.url }}" />
+                                {% else %}
+                                <img class="img-responsive" src="{% static 'default/profile.png' %}" />
+                                {% endif %}
+                            </div>
+                            <div class="col-sm-10">
+                                <p>{{ child_comment.content|linebreaks }}</p>
+                            </div>
+                        </div>
+                        <footer>
+                            via {{ child_comment.user.username }} |
+                            {{ child_comment.timestamp|timesince }} ago |
+
+                            {% if request.user == child_comment.user %}
+                            <a href="{{ child_comment.get_delete_url }}">Delete</a>
+                            {% endif %}
+                        </footer>
+                        <hr/>
+                        {% endfor %}
+                        {% if request.user.is_authenticated %}
+                        <form method="POST" action="."> {% csrf_token %}
+                            {{ comment_form|crispy }}
+                            <input type="hidden" name='parent_id' value="{{ comment.id }}" />
+                            <input type="submit" class="btn btn-primary btn-sm" value="Reply" />
+                        </form>
+                        {% else %}
+                        <p>You must login to comment.</p>
+                        {% endif %}
+                    </div>
+                    <hr/>
+                    {% endfor %}
+                    <!--<div class="well fb-comments" data-href="{{ request.build_absolute_uri }}" data-numposts="5"></div>-->
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+<!--   to share Post on different social networks   -->
+<!--<p>-->
+    <!--<a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}">-->
+        <!--Facebook-->
+    <!--</a>-->
+    <!--<a href="https://twitter.com/home?status={{ post.content|urlify }}%20{{ request.build_absolute_uri }}">-->
+        <!--Twitter-->
+    <!--</a>-->
+    <!--<a href='https://plus.google.com/share?url={{ request.build_absolute_uri }}'>-->
+        <!--Google-->
+    <!--</a>-->
+    <!--<a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}&title={{ post.title }}&summary={{ post.content|urlify }}&source={{ request.build_absolute_uri }}">-->
+        <!--Linkedin-->
+    <!--</a>-->
+<!--</p>-->
