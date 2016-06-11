@@ -7,4 +7,4 @@ class UserProfileModelAdmin(admin.ModelAdmin):
     class Meta:
         model = UserProfile
 
-admin.site.register(UserProfile,UserProfileModelAdmin)
+admin.site.register(UserProfile, UserProfileModelAdmin)

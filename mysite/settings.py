@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'markdown_deux',    # to convert markdown to html.
     'pagedown',     # WYSIWYG Editor
+    'rest_framework',
 ]
 
 MIDDLEWARE_CLASSES = [
