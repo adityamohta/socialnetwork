@@ -2,7 +2,7 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
 class IsOwnerOrReadOnly(BasePermission):
-    message = 'you must be owner of this posy.'
+    message = 'you must be owner of this object.'
     my_safe_method = ['GET', 'PUT']
 
     def has_permission(self, request, view):
