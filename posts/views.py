@@ -146,7 +146,7 @@ def post_detail(request, slug):  # Retrieve
             if parent_qs.exists() and parent_qs.count() == 1:
                 parent_obj = parent_qs.first()
 
-        new_comment, created = Comment.objects.get_or_create(
+        new_comment = Comment.objects.create(
                 user=request.user,
                 content_type=content_type,
                 object_id=obj_id,
@@ -163,8 +163,7 @@ def post_detail(request, slug):  # Retrieve
                 # extra tags is used to add a tag in message.tags. (can be used to assign classes.
                 extra_tags='html_safe',
         )
-        if not created:
-            print("Failed!")
+
         return HttpResponseRedirect(new_comment.content_object.get_absolute_url())
 
     context = {
