@@ -28,7 +28,7 @@ class UserLoginForm(forms.Form):
             if not user.is_active:
                 raise forms.ValidationError("The user is no longer active")
 
-        return super(UserLoginForm, self).clean(*args, *kwargs)
+        return super(UserLoginForm, self).clean(*args, **kwargs)
 
 
 class UserRegisterForm(forms.ModelForm):
