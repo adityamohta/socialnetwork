@@ -4,6 +4,7 @@ from rest_framework.serializers import (
     SerializerMethodField,
 )
 
+from accounts.api.serializers import UserDetailSerializer
 from comments.api.serializers import CommentSerializer
 from comments.models import Comment
 from ..models import Post
@@ -31,7 +32,7 @@ class PostCreateUpdateSerializer(ModelSerializer):
 
 class PostDetailSerializer(ModelSerializer):
     delete = post_delete_url
-    user = SerializerMethodField()
+    user = UserDetailSerializer()   # SerializerMethodField()
     image = SerializerMethodField()
     html_content = SerializerMethodField()
     comments = SerializerMethodField()
@@ -61,8 +62,9 @@ class PostDetailSerializer(ModelSerializer):
     def get_html_content(self, obj):
         return obj.get_markdown()
 
-    def get_user(self, obj):
-        return str(obj.user.username)
+    # use it when we use: user = SerializerMethodField()
+    # def get_user(self, obj):
+    #     return str(obj.user.username)
 
     def get_comments(self, obj):
         # content_type = obj.get_content_type
@@ -74,7 +76,7 @@ class PostDetailSerializer(ModelSerializer):
 
 class PostListSerializer(ModelSerializer):
     url = post_detail_url
-    user = SerializerMethodField()
+    user = UserDetailSerializer()   # SerializerMethodField()
 
     class Meta:
         model = Post
@@ -87,8 +89,9 @@ class PostListSerializer(ModelSerializer):
             'publish',
         ]
 
-    def get_user(self, obj):
-        return str(obj.user.username)
+    # use it when we use: user = SerializerMethodField()
+    # def get_user(self, obj):
+    #     return str(obj.user.username)
 
 """
 from posts.models import Post

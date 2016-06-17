@@ -1,5 +1,6 @@
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 
 from rest_framework.serializers import (
     CharField,
@@ -14,6 +15,18 @@ from rest_framework.serializers import (
 
 
 User = get_user_model()
+
+
+class UserDetailSerializer(ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+        ]
 
 
 class UserCreateSerializer(ModelSerializer):
@@ -60,8 +73,8 @@ class UserCreateSerializer(ModelSerializer):
 
 class UserLoginSerializer(ModelSerializer):
     token = CharField(allow_blank=True, read_only=True)
-    username = CharField(label='Username')
-    email = EmailField(label='Email Address')
+    username = CharField(label='Username', allow_blank=True, required=False)
+    email = EmailField(label='Email Address', allow_blank=True, required=False)
 
     class Meta:
         model = User
@@ -77,5 +90,28 @@ class UserLoginSerializer(ModelSerializer):
         }
 
     def validate(self, data):
+        user_obj = None
+        email = data.get('email', None)
+        username = data.get('username', None)
+        password = data["password"]
+        if not email and not username:
+            raise ValidationError("A Username or the Email is required to login.")
+        user = User.objects.filter(
+            Q(email=email) |
+            Q(username=username)
+        ).distinct()
+        # if there is no email address associated to user objects.
+        user = user.exclude(email__isnull=True).exclude(email__iexact='')
+
+        if user.exists() and user.count() == 1:
+            user_obj = user.first()
+        else:
+            raise ValidationError("This Username/email is not valid.")
+
+        if user_obj:
+            if not user_obj.check_password(password):
+                raise ValidationError('Incorrect Credentials please try again.')
+
+        data['token'] = "Some Random Token"
 
         return data

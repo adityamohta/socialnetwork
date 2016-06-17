@@ -56,3 +56,5 @@ class UserLoginAPIView(APIView):
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
     # def validate(self, data):
+    #
+    #     return data
